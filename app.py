@@ -10,6 +10,7 @@ import mimetypes
 import numpy as np
 import json
 from dotenv import load_dotenv
+from PIL import Image, ExifTags
 
 # .envファイルの読み込み
 load_dotenv()
@@ -112,16 +113,57 @@ with tab1:
     with st.container(border=True):
         col_a, col_b = st.columns(2)
         with col_a:
-            date = st.date_input("🗓️ 日付", datetime.today())
+            # アイデアB: EXIFで取得した日付があればそれを初期値に使用
+            default_date = st.session_state.get("exif_date", datetime.today())
+            date = st.date_input("🗓️ 日付", default_date)
         with col_b:
             location = st.text_input("📍 場所（例：京都・清水寺）", "京都・清水寺")
-            
-        text_memo = st.text_area("📝 テキストメモ（任意）", "雨の日の静かな寺院...")
+
+        # アイデアA: AIが生成したメモがあればそれを初期値に使用
+        text_memo = st.text_area("📝 テキストメモ（任意）", st.session_state.get("ai_memo", "雨の日の静かな寺院..."))
         
         st.markdown("##### 📎 記憶のメディアを追加（組み合わせ自由）")
         
         # accept_multiple_files=True で複数選択可能に
         image_files = st.file_uploader("写真🖼️（任意・最大6枚で空気感を演出）", type=["jpg", "jpeg", "png"], accept_multiple_files=True)
+
+        # アイデアB: 写真がアップロードされたらEXIFを解析して日付を自動入力
+        if image_files:
+            try:
+                first_img = Image.open(image_files[0])
+                exif_data = first_img._getexif()
+                if exif_data:
+                    tag_map = {v: k for k, v in ExifTags.TAGS.items()}
+                    date_tag = tag_map.get("DateTimeOriginal")
+                    if date_tag and date_tag in exif_data:
+                        dt_str = exif_data[date_tag]  # 例: '2024:07:15 10:30:00'
+                        exif_dt = datetime.strptime(dt_str, "%Y:%m:%d %H:%M:%S")
+                        if st.session_state.get("exif_date") != exif_dt.date():
+                            st.session_state["exif_date"] = exif_dt.date()
+                            st.rerun()
+            except Exception:
+                pass  # EXIFが読めない場合は何もしない
+
+        # アイデアA: AIによるテキストメモ自動生成ボタン
+        if st.button("✨ 写真からAIに思い出を綴ってもらう", disabled=not image_files):
+            with st.spinner("AIが情景を描写中..."):
+                try:
+                    first_file = image_files[0]
+                    first_file.seek(0)
+                    img_bytes = first_file.read()
+                    mime_type, _ = mimetypes.guess_type(first_file.name)
+                    mime_type = mime_type or "image/jpeg"
+                    response = client.models.generate_content(
+                        model="gemini-2.5-flash",
+                        contents=[
+                            types.Part.from_bytes(data=img_bytes, mime_type=mime_type),
+                            "この旅行写真の情景を、思い出に残るような少しエモーショナルな文章（150文字程度）で描写してください。"
+                        ]
+                    )
+                    st.session_state["ai_memo"] = response.text.strip()
+                    st.rerun()
+                except Exception as e:
+                    st.error(f"AIテキスト生成に失敗しました: {e}")
         pdf_file = st.file_uploader("PDF📄（任意・旅程表やパンフなど 最大6ページ）", type=["pdf"])
 
         col1, col2 = st.columns(2)
