@@ -2,3 +2,4 @@ google-genai
 chromadb
 streamlit
 numpy
+pysqlite3-binary
