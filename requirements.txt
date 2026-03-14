@@ -1,5 +1,6 @@
 google-genai
-chromadb
 streamlit
 numpy
-pysqlite3-binary
+supabase
+Pillow
+python-dotenv
