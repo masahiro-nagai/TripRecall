@@ -9,6 +9,10 @@ import uuid
 import mimetypes
 import numpy as np
 import json
+from dotenv import load_dotenv
+
+# .envファイルの読み込み
+load_dotenv()
 
 # --- 1. 初期設定 ---
 try:
