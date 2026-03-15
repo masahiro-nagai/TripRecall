@@ -108,6 +108,12 @@ st.set_page_config(page_title="MomentWeave", page_icon="📖", layout="centered"
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0&display=swap');
+
+    /* "arrow_right"テキストが表示されるspanを完全に非表示にする */
+    span.material-symbols-rounded {
+        display: none !important;
+    }
 
     html, body, [class*="css"], [class*="st-"] {
         font-family: 'Zen Maru Gothic', sans-serif !important;
@@ -148,6 +154,11 @@ st.markdown("""
         border: 2px dashed #FF9A5C !important;
         border-radius: 16px !important;
         background-color: #FFF9F0 !important;
+    }
+
+    /* expanderの開閉アイコン（矢印）を非表示にして他のタブと重ならないようにする */
+    [data-testid="stExpanderToggleIcon"] {
+        display: none !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -211,8 +222,14 @@ with tab1:
                 except Exception as e:
                     st.error(f"AIテキスト生成に失敗しました: {e}")
 
-        # --- オプション（アコーディオン）---
-        with st.expander("📎 その他の記憶も添える（日付・場所・音声など・任意）"):
+        # --- オプション（チェックボックストグル）---
+        date = datetime.today()
+        location = ""
+        audio_file = None
+        video_file = None
+        pdf_file = None
+        show_optional = st.checkbox("📎 その他の記憶も添える（日付・場所・音声など・任意）")
+        if show_optional:
             col_a, col_b = st.columns(2)
             with col_a:
                 default_date = st.session_state.get("exif_date", datetime.today())
