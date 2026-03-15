@@ -220,7 +220,7 @@ with tab1:
                             "date": str(date),
                             "location": location,
                             "text_memo": text_memo,
-                            "image_paths": json.dumps(img_urls),
+                            "image_paths": img_urls,  # listをそのまま渡す（JSONB自動変換）
                             "audio_path": audio_url or "",
                             "video_path": video_url or "",
                             "pdf_path": pdf_url or "",
@@ -237,6 +237,7 @@ with tab2:
 
     query_text = st.text_input("🔍 検索キーワード", "京都の雨の日の寺院の雰囲気")
     query_image = st.file_uploader("🖼️ 参考写真で検索（任意）", type=["jpg", "jpeg", "png"])
+    threshold = st.slider("🎯 検索の一致度（高いほど厳密・低いほどふんわり）", min_value=0.0, max_value=1.0, value=0.4, step=0.05)
 
     if st.button("検索してタイムライン再生", type="primary", use_container_width=True):
         with st.spinner("記憶を検索中..."):
@@ -248,12 +249,13 @@ with tab2:
             if query_embedding:
                 response = supabase.rpc("match_memories", {
                     "query_embedding": query_embedding,
+                    "match_threshold": threshold,
                     "match_count": 5
                 }).execute()
                 results = response.data
 
                 if not results:
-                    st.info("思い出が見つかりませんでした。")
+                    st.info("指定した条件に合う思い出は見つかりませんでした。一致度を下げてみてください。")
                 else:
                     st.write("### 🎬 思い出のタイムライン")
                     # 日付・タイムスタンプ順にソート
@@ -265,8 +267,15 @@ with tab2:
                             st.markdown(f"#### 🗓️ {meta.get('date', '')} 📍 {meta.get('location', '')}")
                             st.caption(f"AI類似度: {similarity:.3f} (1に近いほど検索意図に一致)")
 
-                            # 複数画像のグリッド表示（URLで直接描画）
-                            img_urls = json.loads(meta.get("image_paths", "[]"))
+                            # 複数画像のグリッド表示（str/list 混在データに対応）
+                            raw_paths = meta.get("image_paths", [])
+                            if isinstance(raw_paths, str):
+                                try:
+                                    img_urls = json.loads(raw_paths)
+                                except Exception:
+                                    img_urls = []
+                            else:
+                                img_urls = raw_paths or []
                             if img_urls:
                                 cols = st.columns(min(len(img_urls), 3))
                                 for idx, url in enumerate(img_urls):
