@@ -108,57 +108,136 @@ st.set_page_config(page_title="MomentWeave", page_icon="📖", layout="centered"
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;600;700;800&display=swap');
     @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0&display=swap');
 
-    /* "arrow_right"テキストが表示されるspanを完全に非表示にする */
     span.material-symbols-rounded {
         display: none !important;
     }
 
+    /* Base Font: Zen Maru Gothic for body, Shippori Mincho for Headings */
     html, body, [class*="css"], [class*="st-"] {
         font-family: 'Zen Maru Gothic', sans-serif !important;
+        color: #E2E2E7 !important;
     }
+    
+    h1, h2, h3, h4, h5, h6, .st-emotion-cache-1104qqp,  .stMarkdown h1, .stMarkdown h2, .stMarkdown h3 {
+        font-family: 'Shippori Mincho', serif !important;
+        color: #F2CA50 !important; 
+        font-weight: 600 !important;
+    }
+
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
     header {visibility: hidden;}
 
+    /* Background overrides */
+    .stApp, .main {
+        background-color: #111317 !important;
+    }
+
+    /* Glassmorphism containers with No-Line rule */
     [data-testid="stVerticalBlockBorderWrapper"] {
-        background-color: rgba(255, 255, 255, 0.85) !important;
-        border-radius: 20px !important;
-        box-shadow: 0 8px 24px rgba(60, 49, 42, 0.06) !important;
-        border: 1px solid #EDE4D9 !important;
+        background-color: rgba(30, 32, 36, 0.6) !important;
+        backdrop-filter: blur(20px) !important;
+        -webkit-backdrop-filter: blur(20px) !important;
+        border-radius: 24px !important;
+        border: none !important;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4) !important;
         padding: 1.5rem !important;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
     [data-testid="stVerticalBlockBorderWrapper"]:hover {
         transform: translateY(-2px);
-        box-shadow: 0 12px 30px rgba(60, 49, 42, 0.1) !important;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5) !important;
     }
 
+    /* Primary Buttons - Gradient Gold */
     [data-testid="baseButton-primary"] {
-        background: linear-gradient(135deg, #FF9A5C, #E36F3D) !important;
-        color: white !important;
-        border-radius: 30px !important;
+        background: linear-gradient(135deg, #f2ca50, #d4af37) !important;
+        color: #3c2f00 !important;
+        border-radius: 50px !important;
         padding: 0.5rem 2rem !important;
         font-weight: 700 !important;
         border: none !important;
-        box-shadow: 0 4px 15px rgba(255, 154, 92, 0.3) !important;
+        box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3) !important;
         transition: all 0.3s ease !important;
     }
     [data-testid="baseButton-primary"]:hover {
         transform: translateY(-2px) !important;
-        box-shadow: 0 6px 20px rgba(255, 154, 92, 0.4) !important;
+        box-shadow: 0 6px 20px rgba(212, 175, 55, 0.5) !important;
+        filter: brightness(1.1);
+    }
+    
+    /* Secondary Buttons - Glassy Gold */
+    button[data-testid="baseButton-secondary"] {
+        background-color: rgba(212, 175, 55, 0.1) !important;
+        color: #D4AF37 !important;
+        border: 1px solid rgba(212, 175, 55, 0.2) !important;
+        border-radius: 50px !important;
+        font-weight: 600 !important;
+        transition: all 0.3s ease !important;
+    }
+    button[data-testid="baseButton-secondary"]:hover {
+        background-color: rgba(212, 175, 55, 0.2) !important;
+        border: 1px solid rgba(212, 175, 55, 0.4) !important;
     }
 
+    /* File Dropzone - Subtle Dark Gold */
     [data-testid="stFileUploadDropzone"] {
-        border: 2px dashed #FF9A5C !important;
+        border: 2px dashed #4D4635 !important;
         border-radius: 16px !important;
-        background-color: #FFF9F0 !important;
+        background-color: rgba(26, 28, 32, 0.6) !important;
+        transition: all 0.3s ease !important;
+    }
+    [data-testid="stFileUploadDropzone"]:hover {
+        border-color: #D4AF37 !important;
+        background-color: rgba(26, 28, 32, 0.8) !important;
+    }
+    
+    /* Input Fields */
+    .stTextInput input, .stTextArea textarea, .stDateInput input {
+        background-color: #333539 !important;
+        color: #E2E2E7 !important;
+        border: 1px solid transparent !important;
+        border-radius: 12px !important;
+        padding: 0.5rem 1rem !important;
+    }
+    .stTextInput input:focus, .stTextArea textarea:focus, .stDateInput input:focus {
+        border: 1px solid rgba(212, 175, 55, 0.3) !important;
+        background-color: #37393D !important;
     }
 
-    /* expanderの開閉アイコン（矢印）を非表示にして他のタブと重ならないようにする */
     [data-testid="stExpanderToggleIcon"] {
         display: none !important;
+    }
+    
+    /* Tab Styling Override for sophisticated look */
+    [data-baseweb="tab-list"] {
+        gap: 10px;
+    }
+    [data-baseweb="tab"] {
+        background-color: transparent !important;
+        border-radius: 10px 10px 0 0 !important;
+        padding: 10px 20px !important;
+        border-bottom: 2px solid transparent !important;
+    }
+    [aria-selected="true"] {
+        color: #f2ca50 !important;
+        border-bottom-color: #d4af37 !important;
+    }
+    
+    /* Information boxes (st.info, st.success, etc) */
+    [data-testid="stAlert"] {
+        background-color: rgba(26, 28, 32, 0.8) !important;
+        border: 1px solid #4D4635 !important;
+        color: #E2E2E7 !important;
+        border-radius: 16px !important;
+    }
+    
+    /* Checkbox text */
+    [data-testid="stCheckbox"] label p {
+        color: #E2E2E7 !important;
     }
 </style>
 """, unsafe_allow_html=True)
