@@ -242,24 +242,112 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-st.title("📖 MomentWeave")
-st.markdown("毎日のささやかな瞬間、感情、空気感を優しく織りなす、あなただけの記憶のノートです。")
+ui_texts = {
+    "ja": {
+        "title": "📖 MomentWeave",
+        "subtitle": "毎日のささやかな瞬間、感情、空気感を優しく織りなす、あなただけの記憶のノートです。",
+        "tab_compose": "🖋️ 今日のページを綴る",
+        "tab_search": "🔍 記憶の糸をたぐる",
+        "memo_label": "📝 今の気持ちや、ふと感じたこと...",
+        "memo_placeholder": "今日の空の色、誰かの笑顔、心が動いた瞬間...",
+        "photo_label": "📸 今日の1枚（最大6枚）",
+        "ai_button": "✨ 写真からAIに思い出を綴ってもらう",
+        "ai_loading": "AIが情景を描写中...",
+        "ai_prompt": "この写真の情景を、思い出に残るような少しエモーショナルな文章（150文字程度）で描写してください。",
+        "options_toggle": "📎 その他の記憶も添える（日付・場所・音声など・任意）",
+        "date_label": "🗓️ 日付",
+        "location_label": "📍 場所",
+        "location_placeholder": "お気に入りのカフェ、いつもの散歩道...",
+        "pdf_label": "PDF📄（旅程表やパンフなど 最大6ページ）",
+        "audio_label": "現地音声🎙️（最大80秒）",
+        "video_label": "動画🎥（最大128秒）",
+        "save_button": "✨ この記憶のページを綴じる",
+        "err_photo_max": "⚠️ 写真は最大6枚までです！最初の6枚のみを保存します。",
+        "err_empty": "⚠️ テキストか写真など、なにか1つ入力してください。",
+        "save_loading": "あなたの記憶を優しくページに綴じています...",
+        "save_success": "✅ 今日の記憶を優しく本に挟みました。",
+        "search_title": "記憶の糸をたぐり寄せる",
+        "search_subtitle": "言葉や1枚の写真から、過去のページをめくります。",
+        "search_label": "🔍 思い出したい空気感や、今の気分",
+        "search_placeholder": "温かいコーヒー、雨の日の匂い、静かな夕暮れ...",
+        "search_image": "🖼️ 参考写真で検索（任意）",
+        "search_slider": "💭 記憶のピント（左：ふんわり 〜 右：くっきり）",
+        "search_button": "📖 記憶をめくる",
+        "search_loading": "あなたの記憶をめくっています...",
+        "search_empty": "指定した条件に合う記憶は見つかりませんでした。ピントを左（ふんわり）に動かしてみてください。",
+        "search_results_title": "### 📖 あなたの記憶のページ",
+        "default_location": "ある場所で",
+        "open_pdf": "📄 添付ファイルを開く"
+    },
+    "en": {
+        "title": "📖 MomentWeave",
+        "subtitle": "A gentle notebook for weaving together everyday fleeting moments, feelings, and atmospheres.",
+        "tab_compose": "🖋️ Weave Today's Page",
+        "tab_search": "🔍 Trace the Threads",
+        "memo_label": "📝 Feelings and fleeting thoughts...",
+        "memo_placeholder": "The color of the sky today, someone's smile, a moving moment...",
+        "photo_label": "📸 Today's Photos (Max 6)",
+        "ai_button": "✨ Let AI weave memories from the photo",
+        "ai_loading": "AI is depicting the scene...",
+        "ai_prompt": "Describe the scene in this photo using an emotional and memorable tone (around 50 words).",
+        "options_toggle": "📎 Add other memories (Date, Location, Audio, etc. - Optional)",
+        "date_label": "🗓️ Date",
+        "location_label": "📍 Location",
+        "location_placeholder": "Your favorite cafe, the usual walking path...",
+        "pdf_label": "📄 PDF (Itineraries, brochures - Max 6 pages)",
+        "audio_label": "🎙️ Audio (Max 80s)",
+        "video_label": "🎥 Video (Max 128s)",
+        "save_button": "✨ Bind this memory page",
+        "err_photo_max": "⚠️ Maximum 6 photos allowed! The first 6 will be saved.",
+        "err_empty": "⚠️ Please provide at least text or a photo.",
+        "save_loading": "Gently binding your memory into the pages...",
+        "save_success": "✅ Today's memory has been gently tucked into the book.",
+        "search_title": "Trace the Threads of Memory",
+        "search_subtitle": "Flip through past pages from a word or a single photo.",
+        "search_label": "🔍 Scents, moods, or atmospheres to recall",
+        "search_placeholder": "Warm coffee, the smell of rain, a quiet dusk...",
+        "search_image": "🖼️ Search with a reference photo (Optional)",
+        "search_slider": "💭 Memory Focus (Left: Soft/Vague ~ Right: Sharp)",
+        "search_button": "📖 Flip through memories",
+        "search_loading": "Flipping through your memories...",
+        "search_empty": "No memories matched your search. Try moving the focus to the left (softer).",
+        "search_results_title": "### 📖 Your Memory Pages",
+        "default_location": "somewhere",
+        "open_pdf": "📄 Open attached file"
+    }
+}
 
-tab1, tab2 = st.tabs(["🖋️ 今日のページを綴る", "🔍 記憶の糸をたぐる"])
+if "lang" not in st.session_state:
+    st.session_state["lang"] = "ja"
+
+t = ui_texts[st.session_state["lang"]]
+
+col1, col2 = st.columns([8, 2])
+with col1:
+    st.title(t["title"])
+with col2:
+    lang_sel = st.selectbox("Language / 言語", ["ja", "en"], index=0 if st.session_state["lang"] == "ja" else 1, label_visibility="collapsed")
+    if lang_sel != st.session_state["lang"]:
+        st.session_state["lang"] = lang_sel
+        st.rerun()
+
+st.markdown(t["subtitle"])
+
+tab1, tab2 = st.tabs([t["tab_compose"], t["tab_search"]])
 
 # ============== タブ1: 今日のページを綴る ==============
 with tab1:
     with st.container(border=True):
         # --- メイン入力（テキスト・写真）---
         text_memo = st.text_area(
-            "📝 今の気持ちや、ふと感じたこと...",
+            t["memo_label"],
             st.session_state.get("ai_memo", ""),
             height=120,
-            placeholder="今日の空の色、誰かの笑顔、心が動いた瞬間..."
+            placeholder=t["memo_placeholder"]
         )
 
         image_files = st.file_uploader(
-            "📸 今日の1枚（最大6枚）",
+            t["photo_label"],
             type=["jpg", "jpeg", "png"],
             accept_multiple_files=True
         )
@@ -281,8 +369,8 @@ with tab1:
                 pass
 
         # アイデアA: AIによるテキストメモ自動生成
-        if st.button("✨ 写真からAIに思い出を綴ってもらう", disabled=not image_files):
-            with st.spinner("AIが情景を描写中..."):
+        if st.button(t["ai_button"], disabled=not image_files):
+            with st.spinner(t["ai_loading"]):
                 try:
                     first_file = image_files[0]
                     first_file.seek(0)
@@ -293,7 +381,7 @@ with tab1:
                         model="gemini-2.5-flash",
                         contents=[
                             types.Part.from_bytes(data=img_bytes, mime_type=mime_type),
-                            "この写真の情景を、思い出に残るような少しエモーショナルな文章（150文字程度）で描写してください。"
+                            t["ai_prompt"]
                         ]
                     )
                     st.session_state["ai_memo"] = response.text.strip()
@@ -307,35 +395,35 @@ with tab1:
         audio_file = None
         video_file = None
         pdf_file = None
-        show_optional = st.checkbox("📎 その他の記憶も添える（日付・場所・音声など・任意）")
+        show_optional = st.checkbox(t["options_toggle"])
         if show_optional:
             col_a, col_b = st.columns(2)
             with col_a:
                 default_date = st.session_state.get("exif_date", datetime.today())
-                date = st.date_input("🗓️ 日付", default_date)
+                date = st.date_input(t["date_label"], default_date)
             with col_b:
                 location = st.text_input(
-                    "📍 場所",
-                    placeholder="お気に入りのカフェ、いつもの散歩道..."
+                    t["location_label"],
+                    placeholder=t["location_placeholder"]
                 )
 
-            pdf_file = st.file_uploader("PDF📄（旅程表やパンフなど 最大6ページ）", type=["pdf"])
-            col1, col2 = st.columns(2)
-            with col1:
-                audio_file = st.file_uploader("現地音声🎙️（最大80秒）", type=["mp3", "wav", "m4a"])
-            with col2:
-                video_file = st.file_uploader("動画🎥（最大128秒）", type=["mp4", "mov"])
+            pdf_file = st.file_uploader(t["pdf_label"], type=["pdf"])
+            col1_a, col2_a = st.columns(2)
+            with col1_a:
+                audio_file = st.file_uploader(t["audio_label"], type=["mp3", "wav", "m4a"])
+            with col2_a:
+                video_file = st.file_uploader(t["video_label"], type=["mp4", "mov"])
 
         # --- 保存ボタン ---
-        if st.button("✨ この記憶のページを綴じる", type="primary", use_container_width=True):
+        if st.button(t["save_button"], type="primary", use_container_width=True):
             if image_files and len(image_files) > 6:
-                st.warning("⚠️ 写真は最大6枚までです！最初の6枚のみを保存します。")
+                st.warning(t["err_photo_max"])
                 image_files = image_files[:6]
 
             if not any([text_memo, image_files, audio_file, video_file, pdf_file]):
-                st.error("⚠️ テキストか写真など、なにか1つ入力してください。")
+                st.error(t["err_empty"])
             else:
-                with st.spinner("あなたの記憶を優しくページに綴じています..."):
+                with st.spinner(t["save_loading"]):
                     # 埋め込み生成（アップロード前にファイルポインタをリセット）
                     for f in (image_files or []):
                         f.seek(0)
@@ -372,25 +460,25 @@ with tab1:
                             "embedding": embedding,
                         }).execute()
 
-                        st.success("✅ 今日の記憶を優しく本に挟みました。")
+                        st.success(t["save_success"])
 
 # ============== タブ2: 記憶の糸をたぐる ==============
 with tab2:
-    st.subheader("記憶の糸をたぐり寄せる")
-    st.write("言葉や1枚の写真から、過去のページをめくります。")
+    st.subheader(t["search_title"])
+    st.write(t["search_subtitle"])
 
     query_text = st.text_input(
-        "🔍 思い出したい空気感や、今の気分",
-        placeholder="温かいコーヒー、雨の日の匂い、静かな夕暮れ..."
+        t["search_label"],
+        placeholder=t["search_placeholder"]
     )
-    query_image = st.file_uploader("🖼️ 参考写真で検索（任意）", type=["jpg", "jpeg", "png"])
+    query_image = st.file_uploader(t["search_image"], type=["jpg", "jpeg", "png"])
     threshold = st.slider(
-        "💭 記憶のピント（左：ふんわり 〜 右：くっきり）",
+        t["search_slider"],
         min_value=0.0, max_value=1.0, value=0.4, step=0.05
     )
 
-    if st.button("📖 記憶をめくる", type="primary", use_container_width=True):
-        with st.spinner("あなたの記憶をめくっています..."):
+    if st.button(t["search_button"], type="primary", use_container_width=True):
+        with st.spinner(t["search_loading"]):
             query_embedding = create_embedding(
                 query_text,
                 image_files=[query_image] if query_image else []
@@ -405,13 +493,13 @@ with tab2:
                 results = response.data
 
                 if not results:
-                    st.info("指定した条件に合う記憶は見つかりませんでした。ピントを左（ふんわり）に動かしてみてください。")
+                    st.info(t["search_empty"])
                 else:
-                    st.write("### 📖 あなたの記憶のページ")
+                    st.write(t["search_results_title"])
                     results.sort(key=lambda x: (x.get("date", ""), x.get("timestamp", "")))
 
                     for meta in results:
-                        location_str = meta.get("location") or "ある場所で"
+                        location_str = meta.get("location") or t["default_location"]
                         with st.container(border=True):
                             st.markdown(f"### 🍂 🗓️ {meta.get('date', '')} 📍 {location_str}")
 
@@ -442,7 +530,7 @@ with tab2:
 
                             pdf_url = meta.get("pdf_path", "")
                             if pdf_url:
-                                st.markdown(f"[📄 添付ファイルを開く]({pdf_url})")
+                                st.markdown(f"[{t['open_pdf']}]({pdf_url})")
 
                             if meta.get("text_memo"):
                                 st.info(f"📝 {meta['text_memo']}")
